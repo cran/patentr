@@ -1,0 +1,13 @@
+486b9a0cbe166c14f1e709f8854b7863 *DESCRIPTION
+2d18555882c44e1aba6fe4d9e9fae64f *LICENSE
+69eb2f8aa1c805c013330eba6c503120 *NAMESPACE
+bf09183c4324df8f7d01c660753a1f38 *R/RcppExports.R
+353f86785f194237e056ddb4fff6afef *R/acquire.R
+2449d223cc60e6ef5f171ee342c69e88 *R/convert_txt.R
+f4799cdc3d19f6c20f1bc68969584fff *R/patentr.R
+4524d87821214a8748bcccac81370f3c *R/utility.R
+987526ebb2673a651516eb4ccf9d8d84 *man/get_bulk_patent_data.Rd
+6a9da4c4123017d53ac15b8e00c3efcd *src/RcppExports.cpp
+995b8c81e5e70e3f59ef42b42bbbff1d *src/convert_funcs.cpp
+cdf2bf1a9da0e5d4cb482cd5c4e68572 *tests/testthat.R
+b4e20ca251d278138427fd69f708533d *tests/testthat/test-utility-funcs.R
