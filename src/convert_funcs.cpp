@@ -52,7 +52,7 @@ std::string extractField(const std::string &line, int startPos)
 
 void formatName(std::string &name)
 {
-    int semicolon = name.find(';');
+    long unsigned int semicolon = name.find(';');
 
     // leave as-is if there's no semi colon or if the format is not as expected
     if (semicolon == std::string::npos || name.length() < semicolon + 2) return ;
@@ -61,6 +61,21 @@ void formatName(std::string &name)
                 revised = name.substr(semicolon + 2);
 
     name = revised + " " + temp;
+}
+
+std::string formatDate(const std::string &date)
+{
+    if (date.length() != 8) return date;
+    
+    std::string ans = "";
+    int i;
+    for (i = 0; i < 4; i++) ans.push_back(date[i]);
+    ans.push_back('-');
+    for (; i < 6; i++) ans.push_back(date[i]);
+    ans.push_back('-');
+    for (; i < 8; i++) ans.push_back(date[i]);
+    
+    return ans;
 }
 
 void appendToField(std::string &orig, const std::string &addon)
@@ -82,6 +97,57 @@ void alphaDigitOnly(std::string &text)
     text = ans;
 }
 
+void removeQuotes(std::string &text)
+{
+    std::replace(text.begin(), text.end(), '\"', ' ');
+    std::replace(text.begin(), text.end(), '\'', ' ');
+}
+
+// prefer vector<int> over Rcpp::NumericVector b/c unknown number of patents
+//   and NumericVector appears to be immutable (can add easily to vector<int>)
+// works for xml1 and xml2 formats
+// [[Rcpp::export]]
+std::vector<int> get_xml_sizes(std::string input_file)
+{
+    // setup empty vector that will contain # lines per patent in this file
+    std::vector<int>sizes;
+    
+    // setup IO
+    std::ifstream fin(input_file);
+    
+    // read through file and store # lines per patent
+    int counter = -1;
+    std::string temp;
+    while (!fin.eof())
+    {
+        // read current line and see if it equals delimiting line b/n patents
+        getline(fin, temp);
+        
+        if (startsWith(temp, "<?xml version"))
+        {
+            // ignore first meaningless value
+            if (counter < 0)
+            {
+                counter = 0;
+            }
+            else
+            {
+                sizes.push_back(counter);
+                counter = 0;
+            }
+        }
+        
+        counter++;
+    }
+    sizes.push_back(counter);
+    
+    // close IO
+    fin.close();
+    
+    // return relevant answer
+    return(sizes);
+}
+
 // [[Rcpp::export]]
 int txt_to_df_cpp(std::string input_file, std::string output_file, bool append, bool header)
 {
@@ -99,7 +165,7 @@ int txt_to_df_cpp(std::string input_file, std::string output_file, bool append, 
         fout = std::ofstream(output_file);
 
         // output header line to CSV (if necessary)
-        if (header) fout << "WKU,Title,App_Date,Issue_Date,Inventor,Assignee,ICL_Class,References\n";
+        if (header) fout << "WKU,Title,App_Date,Issue_Date,Inventor,Assignee,ICL_Class,References,Claims\n";
     }
 
     // variables holding patent properties
@@ -116,10 +182,13 @@ int txt_to_df_cpp(std::string input_file, std::string output_file, bool append, 
                 tempInvt = "",
                 tempAssg = "",
                 tempClass = "",
-                tempRef = "";
+                tempRef = "",
+                currClaims = "",
+                tempClaims = "";
     bool inPatent = false,
          gotAPD = false,
-         gotISD = false;
+         gotISD = false,
+         inClaims = false;
 
     // read input file line-by-line and store patent data
     getline(fin, currLine);
@@ -132,15 +201,21 @@ int txt_to_df_cpp(std::string input_file, std::string output_file, bool append, 
             // print past patent (unless this is the first one)
             if (inPatent)
             {
+                // remove quotes from text claims field first to avoid CSV issues
+                removeQuotes(currClaims);
+                removeQuotes(inventor);
+                removeQuotes(assignee);
+                removeQuotes(title);
                 fout << currID
                   << ",\"" << title
-                  << "\"," << appDate
-                  << "," << issDate
+                  << "\"," << formatDate(appDate)
+                  << "," << formatDate(issDate)
                   << ",\"" << inventor
                   << "\",\"" << assignee
                   << "\"," << iclClass
                   << "," << refs
-                  << "\n";
+                  << ",\"" << currClaims
+                  << "\"\n";
             }
             else inPatent = true;
 
@@ -159,6 +234,9 @@ int txt_to_df_cpp(std::string input_file, std::string output_file, bool append, 
             iclClass = "";
             tempRef = "";
             refs = "";
+            currClaims = "";
+            tempClaims = "";
+            inClaims = false;
         }
         else if (inPatent && startsWith(currLine, "TTL  "))
         {
@@ -225,21 +303,57 @@ int txt_to_df_cpp(std::string input_file, std::string output_file, bool append, 
             // add this reference to set of references for this patent
             appendToField(refs, tempRef);
         }
+        else if (inPatent && (startsWith(currLine, "CLMS") || startsWith(currLine, "DCLM")))
+        {
+            // we're in claims, text will be coming soon
+            inClaims = true;
+        }
+        // start of claims section marked with STM
+        else if (inPatent && inClaims && startsWith(currLine, "STM "))
+        {
+            tempClaims = extractField(currLine, 5);
+            stripEdgeWhitespace(tempClaims);
+            currClaims = tempClaims;
+        }
+        else if (inPatent && inClaims && startsWith(currLine, "NUM "))
+        {
+            // don't do anything, but don't want to go to else branch either
+        }
+        else if (inPatent && inClaims && (startsWith(currLine, "PAR  ") ||
+                                          startsWith(currLine, "PA1  ") ||
+                                          startsWith(currLine, "PAL  ") ||
+                                          startsWith(currLine, "     ")))
+        {
+            // add claims text
+            tempClaims = extractField(currLine, 5);
+            stripEdgeWhitespace(tempClaims);
+            currClaims += tempClaims;
+        }
+        else
+        {
+            // not in claims anymore
+            inClaims = false;
+        }
 
         // read next line
         getline(fin, currLine);
     }
 
     // output details of last patent
+    removeQuotes(currClaims);
+    removeQuotes(inventor);
+    removeQuotes(assignee);
+    removeQuotes(title);
     fout << currID
          << ",\"" << title
-         << "\"," << appDate
-         << "," << issDate
-         << "," << inventor
-         << "," << assignee
-         << "," << iclClass
+         << "\"," << formatDate(appDate)
+         << "," << formatDate(issDate)
+         << ",\"" << inventor
+         << "\",\"" << assignee
+         << "\"," << iclClass
          << "," << refs
-         << "\n";
+         << ",\"" << currClaims
+         << "\"\n";
 
     // close IO
     fin.close();

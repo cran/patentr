@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Raoul R. Wadhwa, James Yu, Milind Y. Desai, Péter Érdi, Jacob G. Scott" />
+
+<meta name="date" content="2021-07-17" />
+
+<title>Introduction to patentr</title>
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to patentr</h1>
+<h4 class="author">Raoul R. Wadhwa, James Yu, Milind Y. Desai, Péter Érdi, Jacob G. Scott</h4>
+<h4 class="date">17 July 2021</h4>
+
+
+
+<div id="purpose" class="section level2">
+<h2>Purpose</h2>
+<p>Information about patents approved in the United States is publicly available. The United States Patent and Trademark Office (USPTO) provides digital bulk patent files on its website containing basic details including patent titles, application and issue dates, classification, and so on. Although files are available for patents issued during or after 1976, patents from different periods are accessible in different formats: patents issued between 1976 and 2001 (inclusive) are provided in TXT files; patents issued between 2002 and 2004 (inclusive) are provided in one XML format; and patents issued during or after 2005 are provided in a second XML format. The <code>patentr</code> R package accesses USPTO bulk data files and converts them to rectangular CSV format so that users do not have to deal with distinct formats and can work with patent data more easily.</p>
+</div>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>CRAN hosts the stable version of <code>patentr</code> and GitHub hosts the development version. Each of the lines of code below install the respective version.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># stable version from CRAN</span></a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">install.packages</span>(<span class="st">&quot;patentr&quot;</span>)</a>
+<a class="sourceLine" id="cb1-3" title="3"></a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="co"># development version from GitHub</span></a>
+<a class="sourceLine" id="cb1-5" title="5">remotes<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;JYProjs/patentr&quot;</span>)</a></code></pre></div>
+</div>
+<div id="data-acquisition" class="section level2">
+<h2>Data acquisition</h2>
+<p>Acquiring patent data from the USPTO is straightforward with <code>patentr</code>’s <code>get_bulk_patent_data</code> function. First, we load <code>patentr</code> and the packages we’ll need for this vignette.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">library</span>(patentr)</a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="kw">library</span>(tibble)    <span class="co"># for the tibble data containers</span></a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="kw">library</span>(magrittr)  <span class="co"># for the pipe (%&gt;%) operator</span></a>
+<a class="sourceLine" id="cb2-4" title="4"><span class="kw">library</span>(dplyr)     <span class="co"># to work with patent data</span></a>
+<a class="sourceLine" id="cb2-5" title="5"><span class="kw">library</span>(lubridate) <span class="co"># to work with dates</span></a></code></pre></div>
+<p>Then, we use it to acquire data from the first 2 weeks in 1976. Since <code>patentr</code> stores the data as a local CSV file, we must import the data into R. For this, we use the <code>read.csv</code> function.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co"># acquire data from USPTO</span></a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="kw">get_bulk_patent_data</span>(</a>
+<a class="sourceLine" id="cb3-3" title="3">  <span class="dt">year =</span> <span class="kw">rep</span>(<span class="dv">1976</span>, <span class="dv">2</span>),            <span class="co"># each week must have a corresponding year</span></a>
+<a class="sourceLine" id="cb3-4" title="4">  <span class="dt">week =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,                     <span class="co"># each week corresponds element-wise to a year</span></a>
+<a class="sourceLine" id="cb3-5" title="5">  <span class="dt">output_file =</span> <span class="st">&quot;temp_output.csv&quot;</span> <span class="co"># output file in which patent data is stored</span></a>
+<a class="sourceLine" id="cb3-6" title="6">)</a>
+<a class="sourceLine" id="cb3-7" title="7"></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co"># import data into R</span></a>
+<a class="sourceLine" id="cb3-9" title="9">patent_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;temp_output.csv&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb3-10" title="10"><span class="st">  </span><span class="kw">as_tibble</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb3-11" title="11"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">App_Date =</span> <span class="kw">as_date</span>(App_Date),</a>
+<a class="sourceLine" id="cb3-12" title="12">         <span class="dt">Issue_Date=</span><span class="kw">as_date</span>(Issue_Date))</a>
+<a class="sourceLine" id="cb3-13" title="13"></a>
+<a class="sourceLine" id="cb3-14" title="14"><span class="co"># delete local file (optional - but we no longer need it for this tutorial)</span></a>
+<a class="sourceLine" id="cb3-15" title="15"><span class="kw">file.remove</span>(<span class="st">&quot;temp_output.csv&quot;</span>)</a></code></pre></div>
+<p>The <code>patent_data</code> variable should be equal to the <code>y1976w1</code> dataset provided with <code>patentr</code>. We peek at the patent data to get a glimpse of its structure.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">tail</span>(patent_data)</a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="co">#&gt; # A tibble: 6 x 9</span></a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="co">#&gt;   WKU    Title   App_Date   Issue_Date Inventor  Assignee  ICL_Class References </span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&gt;   &lt;chr&gt;  &lt;chr&gt;   &lt;date&gt;     &lt;date&gt;     &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;      </span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co">#&gt; 1 03931… Automa… 1974-03-22 1976-01-06 Ichiro T… Sanyo El… G11B 170… 2946593;31…</span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt; 2 03931… Transd… 1974-08-22 1976-01-06 Robert B… Internat… G11B  54… 3310792;35…</span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="co">#&gt; 3 03931… Magnet… 1973-06-15 1976-01-06 Koichi K… Matsushi… G11B  51… 2992474;36…</span></a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt; 4 03931… Magnet… 1974-04-08 1976-01-06 Akio Kur… Matsushi… G11B  54… 3069815;34…</span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt; 5 03931… Jacket… 1975-03-03 1976-01-06 Paul F. … Informat… G11B 230… 3416150;36…</span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&gt; 6 03931… Flexib… 1974-08-29 1976-01-06 Paul D. … Internat… G11B  58… 3852820    </span></a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; # … with 1 more variable: Claims &lt;chr&gt;</span></a>
+<a class="sourceLine" id="cb4-12" title="12"></a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="kw">str</span>(patent_data)</a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt; tibble [1,379 × 9] (S3: tbl_df/tbl/data.frame)</span></a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="co">#&gt;  $ WKU       : chr [1:1379] &quot;RE0286710&quot; &quot;RE0286729&quot; &quot;RE0286737&quot; &quot;RE0286745&quot; ...</span></a>
+<a class="sourceLine" id="cb4-16" title="16"><span class="co">#&gt;  $ Title     : chr [1:1379] &quot;Hydrophone damper assembly&quot; &quot;Pliable tape structure&quot; &quot;Method of preserving perishable products&quot; &quot;Catamenial device&quot; ...</span></a>
+<a class="sourceLine" id="cb4-17" title="17"><span class="co">#&gt;  $ App_Date  : Date[1:1379], format: &quot;1974-08-26&quot; &quot;1975-02-06&quot; ...</span></a>
+<a class="sourceLine" id="cb4-18" title="18"><span class="co">#&gt;  $ Issue_Date: Date[1:1379], format: &quot;1976-01-06&quot; &quot;1976-01-06&quot; ...</span></a>
+<a class="sourceLine" id="cb4-19" title="19"><span class="co">#&gt;  $ Inventor  : chr [1:1379] &quot;James W. Widenhofer&quot; &quot;Alfred W. Wakeman&quot; &quot;Joseph J. Esty&quot; &quot;Linda S. Guyette&quot; ...</span></a>
+<a class="sourceLine" id="cb4-20" title="20"><span class="co">#&gt;  $ Assignee  : chr [1:1379] &quot;Sparton Corporation&quot; &quot;&quot; &quot;U. C. San Diego Foundation&quot; &quot;&quot; ...</span></a>
+<a class="sourceLine" id="cb4-21" title="21"><span class="co">#&gt;  $ ICL_Class : chr [1:1379] &quot;B63B 2152;B63B 5102&quot; &quot;E05D  700&quot; &quot;B65B 3104&quot; &quot;A61f 1320&quot; ...</span></a>
+<a class="sourceLine" id="cb4-22" title="22"><span class="co">#&gt;  $ References: chr [1:1379] &quot;2790186;3329015;3377615;3543228;3543228;3711821;3720909;3803540&quot; &quot;1843170;2611659;3279473;3442415;3851353&quot; &quot;2242686;2814382;3313084&quot; &quot;1222825;1401358;1887526;3085574&quot; ...</span></a>
+<a class="sourceLine" id="cb4-23" title="23"><span class="co">#&gt;  $ Claims    : chr [1:1379] &quot;I claim:1. A hydrophone damper assembly comprising, in combination, an elongatedtube of flexible material havin&quot;| __truncated__ &quot;What is claimed is:1. A flexible tape for joining mating edges of adjacent members,said tape having an X-like c&quot;| __truncated__ &quot;Having described my invention, I now claim:1. Those steps in the method of preserving a perishable product in a&quot;| __truncated__ &quot;I claim:1. A rolled cylindrical tampon .Iadd.having means for conducting body fluidto the interior thereof, sai&quot;| __truncated__ ...</span></a></code></pre></div>
+</div>
+<div id="sample-use" class="section level2">
+<h2>Sample use</h2>
+<p>For the recently acquired set of patents, let’s say we are interested in how long it took for the patents to get issued once the application was submitted. We can calculate the difference between issue date (<code>Issue_Date</code> column) and application date (<code>App_Date</code>) column, then either obtain a numerical summary or visualize the results as a histogram. The code block below does both.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="co"># calculate time from application to issue (in days)</span></a>
+<a class="sourceLine" id="cb5-2" title="2">lag_time &lt;-<span class="st"> </span>patent_data <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="st">  </span><span class="kw">transmute</span>(<span class="dt">Lag =</span> Issue_Date <span class="op">-</span><span class="st"> </span>App_Date) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="st">  </span><span class="kw">pull</span>(Lag) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb5-5" title="5"><span class="st">  </span>as.numeric</a>
+<a class="sourceLine" id="cb5-6" title="6"></a>
+<a class="sourceLine" id="cb5-7" title="7"><span class="co"># get quantitative summary</span></a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="kw">summary</span>(lag_time)</a>
+<a class="sourceLine" id="cb5-9" title="9"><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></a>
+<a class="sourceLine" id="cb5-10" title="10"><span class="co">#&gt;   230.0   463.0   599.0   654.1   761.5  9331.0</span></a>
+<a class="sourceLine" id="cb5-11" title="11"></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="co"># plot as histogram</span></a>
+<a class="sourceLine" id="cb5-13" title="13"><span class="kw">hist</span>(lag_time,</a>
+<a class="sourceLine" id="cb5-14" title="14">     <span class="dt">main =</span> <span class="st">&quot;Histogram of delay before issue&quot;</span>,</a>
+<a class="sourceLine" id="cb5-15" title="15">     <span class="dt">xlab =</span> <span class="st">&quot;Time (days)&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;Count&quot;</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>In addition to application and issue dates, the downloaded USPTO data contains multiple text columns. More information about these can be found at <a href="https://www.uspto.gov/" class="uri">https://www.uspto.gov/</a>.</p>
+</div>
+<div id="available-data-for-each-patent" class="section level2">
+<h2>Available data for each patent</h2>
+<p>Text in boldface corresponds to column names in datasets returned by <code>get_bulk_patent_data</code>. Note that the following definitions for each column in the returned dataset are intuitive, not official, definitions. For official definitions, visit <a href="https://www.uspto.gov/" class="uri">https://www.uspto.gov/</a>.</p>
+<ul>
+<li><strong>WKU:</strong> unique identifier for each patent. This is not identical to the patent number, but is derived from it. The WKU generally has an additional leading zero or a checksum at the end.</li>
+<li><strong>Title:</strong> patent title.</li>
+<li><strong>App_Date:</strong> date the patent application was submitted.</li>
+<li><strong>Issue_Date:</strong> date the patent was filed.</li>
+<li><strong>Inventor:</strong> person(s) or organization(s) credited with inventing the patent.</li>
+<li><strong>Assignee:</strong> person(s) or organization(s) with an ownership interest in the patent.</li>
+<li><strong>ICL_Class:</strong> patent class based on the International Patent Classification (IPC) system. For more information, visit <a href="https://www.wipo.int/classifications/ipc/en" class="uri">https://www.wipo.int/classifications/ipc/en</a>.</li>
+<li><strong>References:</strong> set of patents cited by this patent.</li>
+<li><strong>Claims:</strong> text field of claims regarding what should be protected by this patent.</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

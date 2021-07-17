@@ -11,8 +11,8 @@
 #'   collected
 #' @param week integer vector of weeks within the corresponding `year` element
 #'   from which patents should be collected
-#' @param output_file if `NULL`, returns a data frame; if a `character`
-#'   (single-element vector), will output to that file in CSV format
+#' @param output_file variable of class `character`; will output to that file
+#'   in CSV format
 #' @return either `TRUE` (placeholder) or object of class `data.frame` (see
 #'   param `output_file` for details)
 #' @export
@@ -27,7 +27,7 @@
 #' get_bulk_patent_data(year = rep(1980, 5), week = 48:52,
 #'                      output_file = "patent-data.csv")
 #' }
-get_bulk_patent_data <- function(year, week, output_file = NULL) {
+get_bulk_patent_data <- function(year, week, output_file) {
   # valid arguments?
   if (sum(is.na(year)) > 0 | sum(is.na(week)) > 0 |
       sum(is.null(year)) > 0 | sum(is.null(week)) > 0) {
@@ -50,17 +50,17 @@ get_bulk_patent_data <- function(year, week, output_file = NULL) {
     stop(paste("Cannot get patent data prior to 1976; passed year =",
                year),
          call. = FALSE)
-  } else if (sum(year > lubridate::year(curr_day))) {
+  } else if (sum(year > lubridate::year(curr_day)) > 0) {
     stop(paste("Cannot get patent data from the future; passed year =",
                year, "& today =", curr_day))
   }
-  if (week < 0 | week > 53) {
+  if (sum(week <= 0) > 0 | sum(week > 53) > 0) {
     stop(paste("`week` variable must be valid (between 1 and 53, inclusive);",
                "passed week =", week))
   }
   # add checks to see if week is in the future
   # add checks to see if week is valid for the year (e.g. if 53 and year doesn't have start of 53rd week)
-
+  
   # make appropriate data frame
   date_df <- data.frame(Year = year,
                         Week = week)
@@ -69,19 +69,24 @@ get_bulk_patent_data <- function(year, week, output_file = NULL) {
   date_df_txt <- dplyr::filter(date_df, .data$Year <= 2001)
   date_df_xml1<- dplyr::filter(date_df, .data$Year >= 2002 & .data$Year <= 2004)
   date_df_xml2<- dplyr::filter(date_df, .data$Year >= 2005)
+  
+  # output header
+  cat("WKU,Title,App_Date,Issue_Date,Inventor,Assignee,ICL_Class,References,Claims\n",
+      file = output_file)
 
-  # NEED TO ADD OTHER 2 FORMATS HERE
-  # get data for all 3
-  df_store <- vector(mode = "list", length = 3)
-  df_store[[1]] <- convert_txt_to_df(date_df_txt, output_file = output_file)
-
-  # combine (if in df format)
-  ans <- TRUE
-  if (!is.null(output_file)) {
-    ans <- data.table::rbindlist(df_store)
-    attr(ans, ".internal.selfref") <- NULL # remove unnecessary attribute
+  # get data for all 3 and return TRUE if all worked
+  if (nrow(date_df_txt) > 0) {
+    convert_txt(date_df_txt, output_file, header = FALSE)
   }
-
-  # return (TRUE or df)
-  return(ans)
+  if (nrow(date_df_xml1) > 0) {
+    convert_xml1(date_df_xml1, output_file, header = FALSE)
+  }
+  if (nrow(date_df_xml2) > 0) {
+    convert_xml2(date_df_xml2, output_file, header = FALSE)
+  }
+  
+  # convert WKU to patent numbers (make sure nothing was ruined in the process)
+  # only do if non-empty to avoid errors
+  
+  TRUE
 }
